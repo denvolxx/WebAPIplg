@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebAPIplg.DTO.Person;
 using WebAPIplg.Models;
 using WebAPIplg.Services.PersonService;
 
@@ -16,21 +17,21 @@ namespace WebAPIplg.Controllers
         }
 
         [HttpGet("GetAll", Order = 0)]
-        public async Task<ActionResult<ServiceResponce<List<Person>>>> GetAll()
+        public async Task<ActionResult<ServiceResponce<List<PersonDTO>>>> GetAll()
         {
             return Ok(await _personService.GetAllPeople());
         }
 
         [HttpGet("Get/{id}", Order = 1)]
-        public async Task<ActionResult<ServiceResponce<Person>>> Get(int id)
+        public async Task<ActionResult<ServiceResponce<PersonDTO>>> Get(int id)
         {
             return Ok(await _personService.GetPersonById(id));
         }
 
         [HttpPost("AddPerson")]
-        public async Task<ActionResult<ServiceResponce<Person>>> AddPerson(Person person)
+        public async Task<ActionResult<ServiceResponce<PersonDTO>>> AddPerson(PersonDTO personDto)
         {
-            return Ok(await _personService.AddPerson(person));
+            return Ok(await _personService.AddPerson(personDto));
         }
     }
 }
