@@ -16,14 +16,16 @@ namespace WebAPIplg.Controllers
             _personService = personService;
         }
 
-        [HttpGet("GetAll", Order = 0)]
-        public async Task<ActionResult<ServiceResponce<List<PersonDTO>>>> GetAll()
+        //TODO: Update Get/Post methods with proper responce codes and messages
+
+        [HttpGet("GetAllPeople")]
+        public async Task<ActionResult<ServiceResponce<List<PersonDTO>>>> GetAllPeople()
         {
             return Ok(await _personService.GetAllPeople());
         }
 
-        [HttpGet("Get/{id}", Order = 1)]
-        public async Task<ActionResult<ServiceResponce<PersonDTO>>> Get(int id)
+        [HttpGet("GetPerson/{id}")]
+        public async Task<ActionResult<ServiceResponce<PersonDTO>>> GetPerson(int id)
         {
             return Ok(await _personService.GetPersonById(id));
         }
@@ -33,5 +35,34 @@ namespace WebAPIplg.Controllers
         {
             return Ok(await _personService.AddPerson(personDto));
         }
+
+        [HttpPut("UpdatePerson")]
+        public async Task<ActionResult<ServiceResponce<PersonDTO>>> UpdatePerson(PersonDTO personDto)
+        {
+            var responce = await _personService.UpdatePerson(personDto);
+            if (responce.Value is null)
+            {
+                return NotFound(responce);
+            }
+            else
+            {
+                return Ok();
+            }
+        }
+
+        [HttpDelete("DeletePerson/{id}")]
+        public async Task<ActionResult<ServiceResponce<PersonDTO>>> DeletePerson(int id)
+        {
+            var responce = await _personService.DeletePerson(id);
+            if (responce.Value is null)
+            {
+                return NotFound(responce);
+            }
+            else
+            {
+                return Ok();
+            }
+        }
+
     }
 }

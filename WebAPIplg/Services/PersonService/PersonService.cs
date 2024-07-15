@@ -27,9 +27,9 @@ namespace WebAPIplg.Services.PersonService
 
         public async Task<ServiceResponce<PersonDTO>> GetPersonById(int id)
         {
+            var serviceResponce = new ServiceResponce<PersonDTO>();
             var person = people.FirstOrDefault(p => p.Id == id);
 
-            var serviceResponce = new ServiceResponce<PersonDTO>();
             serviceResponce.Value = _mapper.Map<PersonDTO>(person);
 
             return serviceResponce;
@@ -37,10 +37,56 @@ namespace WebAPIplg.Services.PersonService
 
         public async Task<ServiceResponce<PersonDTO>> AddPerson(PersonDTO personDto)
         {
+            var serviceResponce = new ServiceResponce<PersonDTO>();
+
             people.Add(_mapper.Map<Person>(personDto));
 
-            var serviceResponce = new ServiceResponce<PersonDTO>();
             serviceResponce.Value = personDto;
+
+            return serviceResponce;
+        }
+
+        public async Task<ServiceResponce<PersonDTO>> UpdatePerson(PersonDTO personDto)
+        {
+            var serviceResponce = new ServiceResponce<PersonDTO>();
+            try
+            {
+                var person = people.FirstOrDefault(p => p.Id == personDto.Id);
+                if (person == null)
+                    throw new Exception($"Character was not found");
+
+                _mapper.Map(personDto, person);
+
+                serviceResponce.Value = personDto;
+            }
+            catch (Exception ex)
+            {
+                serviceResponce.Success = false;
+                serviceResponce.Message = ex.Message;
+            }
+
+            return serviceResponce;
+        }
+
+        public async Task<ServiceResponce<PersonDTO>> DeletePerson(int id)
+        {
+            var serviceResponce = new ServiceResponce<PersonDTO>();
+
+            try
+            {
+                var person = people.FirstOrDefault(p => p.Id == id);
+                if (person == null)
+                    throw new Exception($"Character was not found");
+
+                people.Remove(person);
+
+                serviceResponce.Value = _mapper.Map<PersonDTO>(person);
+            }
+            catch (Exception ex)
+            {
+                serviceResponce.Success = false;
+                serviceResponce.Message = ex.Message;
+            }
 
             return serviceResponce;
         }
