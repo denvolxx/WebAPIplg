@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebAPIplg.DTO.Person;
 using WebAPIplg.Models;
 using WebAPIplg.Services.PersonService;
@@ -20,11 +21,27 @@ namespace WebAPIplg.Controllers
         }
 
         //TODO: Update Get/Post methods with proper responce codes and messages
-
+        [AllowAnonymous]
         [HttpGet("GetAllPeople")]
         public async Task<ActionResult<ServiceResponce<List<PersonDTO>>>> GetAllPeople()
         {
             var responce = await _personService.GetAllPeople();
+            if (responce == null)
+            {
+                return NotFound(responce);
+            }
+            else
+            {
+                return Ok(responce);
+            }
+
+        }
+
+        [AllowAnonymous]
+        [HttpGet("GetSubordinates/{moderatorId}")]
+        public async Task<ActionResult<ServiceResponce<List<PersonDTO>>>> GetSubordinates(Guid moderatorId)
+        {
+            var responce = await _personService.GetSubordinates(moderatorId);
             if (responce == null)
             {
                 return NotFound(responce);

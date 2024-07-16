@@ -27,6 +27,27 @@ namespace WebAPIplg.Services.PersonService
                     throw new Exception($"Unable to retrieve people");
 
                 serviceResponce.Value = dbPeople.Select(p => _mapper.Map<PersonDTO>(p)).ToList();
+                serviceResponce.Message = "Success";
+            }
+            catch (Exception ex)
+            {
+                serviceResponce.Success = false;
+                serviceResponce.Message = ex.Message;
+            }
+            return serviceResponce;
+        }
+
+        public async Task<ServiceResponce<List<PersonDTO>>> GetSubordinates(Guid moderatorId)
+        {
+            var serviceResponce = new ServiceResponce<List<PersonDTO>>();
+            try
+            {
+                var dbPeople = await _context.Person.Where(p => p.Moderator!.Id == moderatorId).ToListAsync();
+                if (dbPeople == null)
+                    throw new Exception($"Unable to retrieve people");
+
+                serviceResponce.Value = dbPeople.Select(p => _mapper.Map<PersonDTO>(p)).ToList();
+                serviceResponce.Message = "Success";
             }
             catch (Exception ex)
             {

@@ -53,12 +53,6 @@ namespace WebAPIplg.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
@@ -68,10 +62,12 @@ namespace WebAPIplg.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("ModeratorId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ModeratorId");
 
                     b.ToTable("Person");
                 });
@@ -102,6 +98,15 @@ namespace WebAPIplg.Migrations
                     b.ToTable("Queues");
                 });
 
+            modelBuilder.Entity("WebAPIplg.Models.Person", b =>
+                {
+                    b.HasOne("WebAPIplg.Models.Moderator", "Moderator")
+                        .WithMany("Subordinates")
+                        .HasForeignKey("ModeratorId");
+
+                    b.Navigation("Moderator");
+                });
+
             modelBuilder.Entity("WebAPIplg.Models.Queue", b =>
                 {
                     b.HasOne("WebAPIplg.Models.Moderator", "Moderator")
@@ -114,6 +119,8 @@ namespace WebAPIplg.Migrations
             modelBuilder.Entity("WebAPIplg.Models.Moderator", b =>
                 {
                     b.Navigation("Queues");
+
+                    b.Navigation("Subordinates");
                 });
 #pragma warning restore 612, 618
         }

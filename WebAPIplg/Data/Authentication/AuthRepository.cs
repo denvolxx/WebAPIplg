@@ -38,7 +38,7 @@ namespace WebAPIplg.Data.Authentication
                 {
                     response.Success = true;
                     response.Value = CreateToken(moderator);
-                    response.Message = $"Moderator {moderator.UserName} was created";
+                    response.Message = $"Moderator {moderator.UserName}. Successful login.";
                 }
             }
             catch (Exception ex)

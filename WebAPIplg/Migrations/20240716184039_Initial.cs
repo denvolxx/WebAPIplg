@@ -34,13 +34,16 @@ namespace WebAPIplg.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Gender = table.Column<int>(type: "int", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    City = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ModeratorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Person", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Person_Moderator_ModeratorId",
+                        column: x => x.ModeratorId,
+                        principalTable: "Moderator",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -62,6 +65,11 @@ namespace WebAPIplg.Migrations
                         principalTable: "Moderator",
                         principalColumn: "Id");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Person_ModeratorId",
+                table: "Person",
+                column: "ModeratorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Queues_ModeratorId",
