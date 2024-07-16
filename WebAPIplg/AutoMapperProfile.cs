@@ -10,6 +10,7 @@ namespace WebAPIplg
         {
             CreateMap<Person, PersonDTO>();
             CreateMap<PersonDTO, Person>();
+            CreateMap<AddPersonDTO, Person>();
         }
     }
 }

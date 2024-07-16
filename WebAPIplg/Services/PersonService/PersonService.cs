@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using System;
+using WebAPIplg.Data;
 using WebAPIplg.DTO.Person;
 using WebAPIplg.Models;
 
@@ -7,41 +10,70 @@ namespace WebAPIplg.Services.PersonService
     public class PersonService : IPersonService
     {
         private readonly IMapper _mapper;
-        public PersonService(IMapper mapper)
+        private readonly DataContext _context;
+        public PersonService(IMapper mapper, DataContext context)
         {
             _mapper = mapper;
+            _context = context;
         }
-
-        private static readonly List<Person> people = new List<Person>() {
-            new Person { Id = 0, FirstName = "Bebro", LastName = "Bebroni" },
-            new Person { Id = 1, FirstName = "Denys", LastName = "Fostytskyi" }
-        };
 
         public async Task<ServiceResponce<List<PersonDTO>>> GetAllPeople()
         {
             var serviceResponce = new ServiceResponce<List<PersonDTO>>();
-            serviceResponce.Value = people.Select(p => _mapper.Map<PersonDTO>(p)).ToList();
+            try
+            {
+                var dbPeople = await _context.Person.ToListAsync();
+                if (dbPeople == null)
+                    throw new Exception($"Unable to retrieve people");
 
+                serviceResponce.Value = dbPeople.Select(p => _mapper.Map<PersonDTO>(p)).ToList();
+            }
+            catch (Exception ex)
+            {
+                serviceResponce.Success = false;
+                serviceResponce.Message = ex.Message;
+            }
             return serviceResponce;
         }
 
         public async Task<ServiceResponce<PersonDTO>> GetPersonById(int id)
         {
             var serviceResponce = new ServiceResponce<PersonDTO>();
-            var person = people.FirstOrDefault(p => p.Id == id);
+            try
+            {
+                var dbPerson = await _context.Person.FirstOrDefaultAsync(p => p.Id == id);
+                if (dbPerson == null)
+                    throw new Exception($"Person was not found");
 
-            serviceResponce.Value = _mapper.Map<PersonDTO>(person);
-
+                serviceResponce.Value = _mapper.Map<PersonDTO>(dbPerson);
+                serviceResponce.Message = "Success";
+            }
+            catch (Exception ex)
+            {
+                serviceResponce.Success = false;
+                serviceResponce.Message = ex.Message;
+            }
             return serviceResponce;
         }
 
-        public async Task<ServiceResponce<PersonDTO>> AddPerson(PersonDTO personDto)
+        public async Task<ServiceResponce<AddPersonDTO>> AddPerson(AddPersonDTO personDto)
         {
-            var serviceResponce = new ServiceResponce<PersonDTO>();
+            var serviceResponce = new ServiceResponce<AddPersonDTO>();
+            try
+            {
+                var person = _mapper.Map<Person>(personDto);
 
-            people.Add(_mapper.Map<Person>(personDto));
+                _context.Person.Add(person);
+                await _context.SaveChangesAsync();
 
-            serviceResponce.Value = personDto;
+                serviceResponce.Value = personDto;
+                serviceResponce.Message = "Person was added";
+            }
+            catch (Exception ex)
+            {
+                serviceResponce.Success = false;
+                serviceResponce.Message = ex.Message;
+            }
 
             return serviceResponce;
         }
@@ -51,13 +83,16 @@ namespace WebAPIplg.Services.PersonService
             var serviceResponce = new ServiceResponce<PersonDTO>();
             try
             {
-                var person = people.FirstOrDefault(p => p.Id == personDto.Id);
-                if (person == null)
-                    throw new Exception($"Character was not found");
+                var dbPerson = await _context.Person.FirstOrDefaultAsync(p => p.Id == personDto.Id);
+                if (dbPerson == null)
+                    throw new Exception($"Unable to update. Person was not found");
 
-                _mapper.Map(personDto, person);
+                //Update all field with mapper
+                _mapper.Map(personDto, dbPerson);
+                await _context.SaveChangesAsync();
 
                 serviceResponce.Value = personDto;
+                serviceResponce.Message = "Person was updated";
             }
             catch (Exception ex)
             {
@@ -74,13 +109,15 @@ namespace WebAPIplg.Services.PersonService
 
             try
             {
-                var person = people.FirstOrDefault(p => p.Id == id);
-                if (person == null)
-                    throw new Exception($"Character was not found");
+                var dbPerson = await _context.Person.FirstOrDefaultAsync(p => p.Id == id);
+                if (dbPerson == null)
+                    throw new Exception($"Unable to delete. Person was not found");
 
-                people.Remove(person);
+                _context.Person.Remove(dbPerson);
+                await _context.SaveChangesAsync();
 
-                serviceResponce.Value = _mapper.Map<PersonDTO>(person);
+                serviceResponce.Value = _mapper.Map<PersonDTO>(dbPerson);
+                serviceResponce.Message = "Person was deleted";
             }
             catch (Exception ex)
             {

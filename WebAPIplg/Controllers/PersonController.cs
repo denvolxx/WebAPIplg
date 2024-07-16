@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure;
+using Microsoft.AspNetCore.Mvc;
 using WebAPIplg.DTO.Person;
 using WebAPIplg.Models;
 using WebAPIplg.Services.PersonService;
@@ -21,19 +22,44 @@ namespace WebAPIplg.Controllers
         [HttpGet("GetAllPeople")]
         public async Task<ActionResult<ServiceResponce<List<PersonDTO>>>> GetAllPeople()
         {
-            return Ok(await _personService.GetAllPeople());
+            var responce = await _personService.GetAllPeople();
+            if (responce == null)
+            {
+                return NotFound(responce);
+            }
+            else
+            {
+                return Ok(responce);
+            }
+
         }
 
         [HttpGet("GetPerson/{id}")]
         public async Task<ActionResult<ServiceResponce<PersonDTO>>> GetPerson(int id)
         {
-            return Ok(await _personService.GetPersonById(id));
+            var responce = await _personService.GetPersonById(id);
+            if (responce == null)
+            {
+                return NotFound(responce);
+            }
+            else
+            {
+                return Ok(responce);
+            }
         }
 
         [HttpPost("AddPerson")]
-        public async Task<ActionResult<ServiceResponce<PersonDTO>>> AddPerson(PersonDTO personDto)
+        public async Task<ActionResult<ServiceResponce<AddPersonDTO>>> AddPerson(AddPersonDTO personDto)
         {
-            return Ok(await _personService.AddPerson(personDto));
+            var responce = await _personService.AddPerson(personDto);
+            if (responce == null)
+            {
+                return BadRequest(responce);
+            }
+            else
+            {
+                return Ok(responce);
+            }
         }
 
         [HttpPut("UpdatePerson")]
@@ -46,7 +72,7 @@ namespace WebAPIplg.Controllers
             }
             else
             {
-                return Ok();
+                return Ok(responce);
             }
         }
 
@@ -60,7 +86,7 @@ namespace WebAPIplg.Controllers
             }
             else
             {
-                return Ok();
+                return Ok(responce);
             }
         }
 
