@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPIplg.DTO.Person;
 using WebAPIplg.Models;
@@ -6,6 +7,7 @@ using WebAPIplg.Services.PersonService;
 
 namespace WebAPIplg.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PersonController : ControllerBase

@@ -1,4 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Xml.Serialization;
 using WebAPIplg.Models;
 
@@ -7,10 +10,12 @@ namespace WebAPIplg.Data.Authentication
     public class AuthRepository : IAuthRepository
     {
         private readonly DataContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AuthRepository(DataContext context)
+        public AuthRepository(DataContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
         public async Task<ServiceResponce<string>> Login(string username, string password)
         {
@@ -32,8 +37,8 @@ namespace WebAPIplg.Data.Authentication
                 else
                 {
                     response.Success = true;
-                    response.Value = moderator.UserName;
-                    response.Message = "Success";
+                    response.Value = CreateToken(moderator);
+                    response.Message = $"Moderator {moderator.UserName} was created";
                 }
             }
             catch (Exception ex)
@@ -109,6 +114,34 @@ namespace WebAPIplg.Data.Authentication
 
                 return computedHash.SequenceEqual(passwordHash);
             }
+        }
+
+        private string CreateToken(Moderator moderator)
+        {
+            var claim = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, moderator.Id.ToString()),
+                new Claim(ClaimTypes.Name, moderator.UserName)
+            };
+
+            var appSettingsToken = _configuration.GetSection("AppSettings:Token").Value;
+            if (appSettingsToken is null)
+                throw new Exception("Token does not exist");
+
+            SymmetricSecurityKey key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(appSettingsToken));
+            SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claim),
+                Expires = DateTime.Now.AddDays(1),
+                SigningCredentials = creds
+            };
+
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
         }
     }
 }
