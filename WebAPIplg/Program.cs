@@ -1,6 +1,7 @@
 using WebAPIplg.Data;
 using WebAPIplg.Services.PersonService;
 using Microsoft.EntityFrameworkCore;
+using WebAPIplg.Data.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 builder.Services.AddScoped<IPersonService, PersonService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 var app = builder.Build();
 
